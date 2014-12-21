@@ -1,5 +1,5 @@
-var unidecode  = require('unidecode'),
-
+var unidecode = require('unidecode'),
+    getSlug = require('speakingurl'),
     utils,
     getRandomInt;
 
@@ -49,21 +49,17 @@ utils = {
         return buf.join('');
     },
     safeString: function (string) {
-        string = string.trim();
+        var slug = getSlug(string, {
+            lang: false // deactivate symbol translation
+        });
 
-        // Remove non ascii characters
-        string = unidecode(string);
-
-        // Remove URL reserved chars: `:/?#[]@!$&'()*+,;=` as well as `\%<>|^~£"`
-        string = string.replace(/[:\/\?#\[\]@!$&'()*+,;=\\%<>\|\^~£"]/g, '')
-            // Replace dots and spaces with a dash
-            .replace(/(\s|\.)/g, '-')
-            // Convert 2 or more dashes into a single dash
-            .replace(/-+/g, '-')
-            // Make the whole thing lowercase
-            .toLowerCase();
-
-        return string;
+        if (slug.length) {
+            return slug;
+        } else {
+            return getSlug(unidecode(string), {
+                lang: false
+            });
+        }
     },
     // The token is encoded URL safe by replcaing '+' with '-', '\' with '_' and removing '='
     // NOTE: the token is not encoded using valid base64 anymore
